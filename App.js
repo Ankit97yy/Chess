@@ -2,7 +2,6 @@ import { StatusBar } from "expo-status-bar";
 import { Button, StyleSheet, Text, View } from "react-native";
 import { PaperProvider } from "react-native-paper";
 import Board from "./Board";
-import Haha from "./Haha";
 
 export default function App() {
   return (

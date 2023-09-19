@@ -64,8 +64,9 @@ export class Knight extends Piece {
 
   isValidMove(x_loc: number, y_loc: number): boolean {
     if (
-      Math.abs(y_loc - this.y_loc) === 2 &&
-      Math.abs(x_loc - this.x_loc) === 1
+      (Math.abs(y_loc - this.y_loc) === 2 &&
+        Math.abs(x_loc - this.x_loc) === 1) ||
+      (Math.abs(this.x_loc - x_loc) === 2 && Math.abs(this.y_loc - y_loc) === 1)
     ) {
       return true;
     } else return false;
@@ -102,17 +103,31 @@ export class Queen extends Piece {
 }
 
 export class Pawn extends Piece {
+  private isFirstMove: boolean = true;
   constructor(color: string, x: number, y: number, name: string) {
     super(color, x, y, name);
   }
   moveTo(x_loc: number, y_loc: number): void {
     this.x_loc = x_loc;
     this.y_loc = y_loc;
+    if (this.isFirstMove) this.isFirstMove = false;
   }
 
   isValidMove(x_loc: number, y_loc: number): boolean {
-    if (y_loc === this.y_loc && x_loc == this.x_loc + 1) {
-      return true;
+    if (y_loc === this.y_loc) {
+      if (
+        this.color === "w" &&
+        (x_loc === this.x_loc - 1 ||
+          (this.isFirstMove && x_loc === this.x_loc - 2))
+      )
+        return true;
+      else if (
+        this.color === "b" &&
+        (x_loc === this.x_loc + 1 ||
+          (this.isFirstMove && x_loc === this.x_loc + 2))
+      )
+        return true;
+      else return false;
     } else return false;
   }
 }

@@ -157,6 +157,7 @@ export default function Board() {
         let piece = Pieces_location[i][j];
         Boxes.push(
           <Box
+            key={`${i}_${j}`}
             icon={
               <FontAwesome5
                 name={`chess-${piece?.getName()}`}
