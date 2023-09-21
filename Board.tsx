@@ -1,9 +1,9 @@
-import { View, Text, TouchableNativeFeedback } from "react-native";
+import { View, Text, TouchableNativeFeedback, Image } from "react-native";
 import React, { useMemo, useState } from "react";
-import { Bishop, King, Knight, Pawn, Queen, Rook } from "./Pieces";
+import { Bishop, King, Knight, Pawn, Piece, Queen, Rook } from "./Pieces";
 import { FontAwesome5 } from "@expo/vector-icons";
 import Pieces_location from "./Pieces";
-
+import { PIECE_IMAGES, Piece_type } from "./Piece_images";
 export default function Board() {
   let Boxes = [];
   const [activePiece, setactivePiece] = useState<
@@ -56,14 +56,19 @@ export default function Board() {
     for (let j: number = 0; j < 8; j++) {
       if (Pieces_location[i][j] !== null) {
         let piece = Pieces_location[i][j];
+        let Piece_image_name = `${piece?.getColor()}_${piece?.getName()}`;
         Boxes.push(
           <Box
             key={`${i}_${j}`}
             icon={
-              <FontAwesome5
-                name={`chess-${piece?.getName()}`}
-                size={27}
-                color={piece?.getColor() === "w" ? "orange" : "black"}
+              // <FontAwesome5
+              //   name={`chess-${piece?.getName()}`}
+              //   size={27}
+              //   color={piece?.getColor() === "w" ? "orange" : "black"}
+              // /
+              <Image
+                source={PIECE_IMAGES[Piece_image_name]}
+                style={{ height: 42, width: 42 }}
               />
             }
             x={i}
