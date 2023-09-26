@@ -1,6 +1,22 @@
-import { View, Text, TouchableNativeFeedback, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableNativeFeedback,
+  Image,
+  StyleSheet,
+} from "react-native";
 import React, { useMemo, useState } from "react";
-import { Bishop, King, Knight, Pawn, Piece, Queen, Rook } from "./Pieces";
+import {
+  Bishop,
+  King,
+  Knight,
+  Pawn,
+  Piece,
+  Queen,
+  Rook,
+  blackKing,
+  whiteKing,
+} from "./Pieces";
 import { FontAwesome5 } from "@expo/vector-icons";
 import Pieces_location from "./Pieces";
 import { PIECE_IMAGES, Piece_type } from "./Piece_images";
@@ -15,10 +31,15 @@ export default function Board() {
       let prev_loc_of_x_and_y: number[] = activePiece.getLocation();
       let prev_x_loc = prev_loc_of_x_and_y[0];
       let prev_y_loc = prev_loc_of_x_and_y[1];
-      if (activePiece.isValidMove(x, y)) {
+      if (activePiece.isValidMove(x, y) && !activePiece.isObstructed(x, y)) {
         Pieces_location[prev_x_loc][prev_y_loc] = null;
         activePiece.moveTo(x, y);
         Pieces_location[x][y] = activePiece;
+        if (activePiece.getColor() === "w") {
+          if (blackKing.isKingChecked()) console.log("black in check");
+        } else {
+          if (whiteKing.isKingChecked()) console.log("white in check");
+        }
         setactivePiece(null);
       } else setactivePiece(null);
     } else if (Pieces_location[x][y] !== null) {
@@ -41,9 +62,13 @@ export default function Board() {
           style={{
             width: 43,
             height: 44,
-            backgroundColor: (x + y) % 2 === 0 ? "white" : "green",
+            backgroundColor: (x + y) % 2 === 0 ? "white" : "#a88154",
             justifyContent: "center",
             alignItems: "center",
+            borderRadius:
+              activePiece !== null && Pieces_location[x][y] === activePiece
+                ? 15
+                : 0,
           }}
         >
           {icon}
@@ -93,3 +118,12 @@ export default function Board() {
     </View>
   );
 }
+// const style = StyleSheet.create({
+//   Box_style: {
+//        width: 43,
+//             height: 44,
+//             backgroundColor: (x + y) % 2 === 0 ? "white" : "#a88154",
+//             justifyContent: "center",
+//             alignItems: "center",
+//   }
+// })
