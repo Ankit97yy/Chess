@@ -1,3 +1,5 @@
+import { Board } from "./Chess_board";
+
 type MoveParams = {
   x_loc: number;
   y_loc: number;
@@ -41,7 +43,7 @@ export class Piece {
     return this.name;
   }
 
-  isObstructed(x_loc: number, y_loc: number): boolean {
+  isObstructed(x_loc: number, y_loc: number, board: Board): boolean {
     let x = this.x_loc;
     let y = this.y_loc;
     while (x !== x_loc || y !== y_loc) {
@@ -50,10 +52,11 @@ export class Piece {
       if (y > y_loc) y--;
       else if (y < y_loc) y++;
       if (x == x_loc && y == y_loc) {
-        if (Pieces_location[x][y]?.getColor() === this.color) return true;
+        if (board.getPieceFromBoard(x, y)?.getColor() === this.color)
+          return true;
         else return false;
       }
-      if (Pieces_location[x][y] !== null) return true;
+      if (board.getPieceFromBoard(x, y) !== null) return true;
     }
     return false;
   }
@@ -62,13 +65,6 @@ export class Piece {
 export class King extends Piece {
   constructor(color: string, x: number, y: number, name: string) {
     super(color, x, y, name);
-  }
-  moveTo(x_loc: number, y_loc: number): void {
-    console.log("king moved");
-    if (this.isObstructed(x_loc, y_loc)) console.log("obstructed");
-
-    this.x_loc = x_loc;
-    this.y_loc = y_loc;
   }
   isValidMove(x_loc: number, y_loc: number): boolean {
     if (x_loc - this.x_loc == 0 && y_loc - this.y_loc == 0) return false;
@@ -83,10 +79,11 @@ export class King extends Piece {
     x: number,
     y: number,
     piece_name_1: string,
-    piece_name_2: string | null
+    piece_name_2: string | null,
+    board: Board
   ): number {
     // console.log(x, y, piece_name_1, piece_name_2);
-    let somePiece = Pieces_location[x][y];
+    let somePiece = board.getPieceFromBoard(x, y);
     if (somePiece !== null && somePiece.getColor() === this.color) return 2;
     if (somePiece !== null && somePiece.getColor() !== this.color) {
       if (piece_name_2 === null) {
@@ -108,7 +105,7 @@ export class King extends Piece {
     return 0;
   }
 
-  isKingChecked(): boolean {
+  isKingChecked(board: Board): boolean {
     let number_of_pieces_threatening = 0;
     if (this.x_loc <= 5 && this.y_loc - 1 >= 0) {
       if (
@@ -116,7 +113,8 @@ export class King extends Piece {
           this.x_loc + 2,
           this.y_loc - 1,
           "knight",
-          null
+          null,
+          board
         ) === 1
       )
         number_of_pieces_threatening++;
@@ -127,7 +125,8 @@ export class King extends Piece {
           this.x_loc + 2,
           this.y_loc + 1,
           "knight",
-          null
+          null,
+          board
         ) === 1
       )
         number_of_pieces_threatening++;
@@ -138,7 +137,8 @@ export class King extends Piece {
           this.x_loc - 2,
           this.y_loc - 1,
           "knight",
-          null
+          null,
+          board
         ) === 1
       )
         number_of_pieces_threatening++;
@@ -149,7 +149,8 @@ export class King extends Piece {
           this.x_loc - 2,
           this.y_loc + 1,
           "knight",
-          null
+          null,
+          board
         ) === 1
       )
         number_of_pieces_threatening++;
@@ -160,7 +161,8 @@ export class King extends Piece {
           this.x_loc - 1,
           this.y_loc + 2,
           "knight",
-          null
+          null,
+          board
         ) === 1
       )
         number_of_pieces_threatening++;
@@ -171,7 +173,8 @@ export class King extends Piece {
           this.x_loc + 1,
           this.y_loc + 2,
           "knight",
-          null
+          null,
+          board
         ) === 1
       )
         number_of_pieces_threatening++;
@@ -182,7 +185,8 @@ export class King extends Piece {
           this.x_loc - 1,
           this.y_loc - 2,
           "knight",
-          null
+          null,
+          board
         ) === 1
       )
         number_of_pieces_threatening++;
@@ -193,7 +197,8 @@ export class King extends Piece {
           this.x_loc + 1,
           this.y_loc - 2,
           "knight",
-          null
+          null,
+          board
         ) === 1
       )
         number_of_pieces_threatening++;
@@ -207,7 +212,8 @@ export class King extends Piece {
         x + this.x_loc,
         this.y_loc,
         "rook",
-        "queen"
+        "queen",
+        board
       );
 
       if (result === 1) {
@@ -227,7 +233,8 @@ export class King extends Piece {
         this.x_loc,
         this.y_loc + y,
         "rook",
-        "queen"
+        "queen",
+        board
       );
       if (result === 1) {
         number_of_pieces_threatening++;
@@ -246,7 +253,8 @@ export class King extends Piece {
         this.x_loc - x,
         this.y_loc,
         "rook",
-        "queen"
+        "queen",
+        board
       );
       if (result === 1) {
         number_of_pieces_threatening++;
@@ -264,7 +272,8 @@ export class King extends Piece {
         this.x_loc,
         this.y_loc - y,
         "rook",
-        "queen"
+        "queen",
+        board
       );
       if (result === 1) {
         number_of_pieces_threatening++;
@@ -282,7 +291,8 @@ export class King extends Piece {
         this.x_loc + x,
         this.y_loc + y,
         "bishop",
-        "queen"
+        "queen",
+        board
       );
       if (result === 1) {
         number_of_pieces_threatening++;
@@ -300,7 +310,8 @@ export class King extends Piece {
         this.x_loc + x,
         this.y_loc - y,
         "bishop",
-        "queen"
+        "queen",
+        board
       );
       if (result === 1) {
         number_of_pieces_threatening++;
@@ -318,7 +329,8 @@ export class King extends Piece {
         this.x_loc - x,
         this.y_loc + y,
         "bishop",
-        "queen"
+        "queen",
+        board
       );
       if (result === 1) {
         number_of_pieces_threatening++;
@@ -336,7 +348,8 @@ export class King extends Piece {
         this.x_loc - x,
         this.y_loc - y,
         "bishop",
-        "queen"
+        "queen",
+        board
       );
       if (result === 1) {
         number_of_pieces_threatening++;
@@ -354,7 +367,8 @@ export class King extends Piece {
             this.x_loc - 1,
             this.y_loc + 1,
             "pawn",
-            null
+            null,
+            board
           ) === 1
         )
           number_of_pieces_threatening++;
@@ -365,7 +379,8 @@ export class King extends Piece {
             this.x_loc - 1,
             this.y_loc - 1,
             "pawn",
-            null
+            null,
+            board
           ) === 1
         )
           number_of_pieces_threatening++;
@@ -378,7 +393,8 @@ export class King extends Piece {
             this.x_loc + 1,
             this.y_loc + 1,
             "pawn",
-            null
+            null,
+            board
           ) === 1
         )
           number_of_pieces_threatening++;
@@ -389,7 +405,8 @@ export class King extends Piece {
             this.x_loc + 1,
             this.y_loc - 1,
             "pawn",
-            null
+            null,
+            board
           ) === 1
         )
           number_of_pieces_threatening++;
@@ -404,11 +421,6 @@ export class Knight extends Piece {
   constructor(color: string, x: number, y: number, name: string) {
     super(color, x, y, name);
   }
-  moveTo(x_loc: number, y_loc: number): void {
-    if (this.isObstructed(x_loc, y_loc)) console.log("knight obstructed");
-    this.x_loc = x_loc;
-    this.y_loc = y_loc;
-  }
 
   isValidMove(x_loc: number, y_loc: number): boolean {
     if (
@@ -420,8 +432,8 @@ export class Knight extends Piece {
     } else return false;
   }
 
-  isObstructed(x_loc: number, y_loc: number): boolean {
-    let somePiece = Pieces_location[x_loc][y_loc];
+  isObstructed(x_loc: number, y_loc: number, board: Board): boolean {
+    let somePiece = board.getPieceFromBoard(x_loc, y_loc);
     if (somePiece !== null && somePiece.getColor() === this.color) return true;
     else return false;
   }
@@ -430,14 +442,6 @@ export class Knight extends Piece {
 export class Bishop extends Piece {
   constructor(color: string, x: number, y: number, name: string) {
     super(color, x, y, name);
-  }
-
-  moveTo(x_loc: number, y_loc: number): void {
-    console.log("bishop moved");
-    if (this.isObstructed(x_loc, y_loc)) console.log("obstructed");
-
-    this.x_loc = x_loc;
-    this.y_loc = y_loc;
   }
 
   isValidMove(x_loc: number, y_loc: number): boolean {
@@ -453,13 +457,6 @@ export class Bishop extends Piece {
 export class Queen extends Piece {
   constructor(color: string, x: number, y: number, name: string) {
     super(color, x, y, name);
-  }
-
-  moveTo(x_loc: number, y_loc: number): void {
-    if (this.isObstructed(x_loc, y_loc)) console.log("queen obstructed");
-
-    this.x_loc = x_loc;
-    this.y_loc = y_loc;
   }
 
   isValidMove(x_loc: number, y_loc: number): boolean {
@@ -480,24 +477,30 @@ export class Pawn extends Piece {
     super(color, x, y, name);
   }
   moveTo(x_loc: number, y_loc: number): void {
-    if (this.isObstructed(x_loc, y_loc)) console.log("pawn obstructd");
     this.x_loc = x_loc;
     this.y_loc = y_loc;
     if (this.isFirstMove) this.isFirstMove = false;
   }
-  isObstructed(x_loc: number, y_loc: number): boolean {
+  isObstructed(x_loc: number, y_loc: number, board: Board): boolean {
     if (this.y_loc === y_loc) {
       if (this.color === "b") {
         let x = this.x_loc + 1;
         while (x <= x_loc) {
-          if (Pieces_location[x++][y_loc] !== null) return true;
+          if (board.getPieceFromBoard(x++, y_loc) !== null) return true;
         }
       } else {
         let x = this.x_loc - 1;
         while (x >= x_loc) {
-          if (Pieces_location[x--][y_loc] !== null) return true;
+          if (board.getPieceFromBoard(x--, y_loc) !== null) return true;
         }
       }
+    } else {
+      if (board.getPieceFromBoard(x_loc, y_loc) === null) return true;
+      if (
+        board.getPieceFromBoard(x_loc, y_loc) !== null &&
+        board.getPieceFromBoard(x_loc, y_loc)?.getColor() === this.color
+      )
+        return true;
     }
     return false;
   }
@@ -522,23 +525,13 @@ export class Pawn extends Piece {
       x_loc === this.x_loc - 1 &&
       Math.abs(y_loc - this.y_loc) === 1
     ) {
-      if (
-        Pieces_location[x_loc][y_loc] !== null &&
-        Pieces_location[x_loc][y_loc]?.getColor() !== this.color
-      )
-        return true;
-      else return false;
+      return true;
     } else if (
       this.color === "b" &&
       x_loc === this.x_loc + 1 &&
       Math.abs(y_loc - this.y_loc) === 1
     ) {
-      if (
-        Pieces_location[x_loc][y_loc] !== null &&
-        Pieces_location[x_loc][y_loc]?.getColor() !== this.color
-      )
-        return true;
-      else return false;
+      return true;
     } else return false;
   }
 }
@@ -556,84 +549,76 @@ export class Rook extends Piece {
       return true;
     } else return false;
   }
-
-  moveTo(x_loc: number, y_loc: number): void {
-    console.log("rook moved");
-    if (this.isObstructed(x_loc, y_loc)) console.log("obstructed");
-
-    this.x_loc = x_loc;
-    this.y_loc = y_loc;
-  }
 }
 
-var Pieces_location: (Bishop | King | Knight | Pawn | Queen | Rook | null)[][] =
-  [];
+// var Pieces_location: (Bishop | King | Knight | Pawn | Queen | Rook | null)[][] =
+//   [];
 
-export let blackKing: King;
-export let whiteKing: King;
+// export let blackKing: King;
+// export let whiteKing: King;
 
-console.log("create board");
+// console.log("create board");
 
-let fen_string = "8/7p/4pkp1/8/4PKP1/8/7P/8";
-let fen_string_len = fen_string.length;
-let i = 0,
-  j = 0,
-  index = 0;
-Pieces_location.push([]);
-while (fen_string_len >= index) {
-  // console.log(i, j);
-  if (fen_string.charAt(index) === "r") {
-    Pieces_location[i][j] = new Rook("b", i, j++, "rook");
-  } else if (fen_string.charAt(index) === "n") {
-    Pieces_location[i][j] = new Knight("b", i, j++, "knight");
-  } else if (fen_string.charAt(index) === "b") {
-    Pieces_location[i][j] = new Bishop("b", i, j++, "bishop");
-  } else if (fen_string.charAt(index) === "q") {
-    Pieces_location[i][j] = new Queen("b", i, j++, "queen");
-  } else if (fen_string.charAt(index) === "k") {
-    Pieces_location[i][j] = new King("b", i, j, "king");
-    blackKing = Pieces_location[i][j++];
-  } else if (fen_string.charAt(index) === "b") {
-    Pieces_location[i][j] = new Bishop("b", i, j++, "bishop");
-  } else if (fen_string.charAt(index) === "n") {
-    Pieces_location[i][j] = new Knight("b", i, j++, "knight");
-  } else if (fen_string.charAt(index) === "r") {
-    Pieces_location[i][j] = new Rook("b", i, j++, "rook");
-  } else if (fen_string.charAt(index) === "p") {
-    Pieces_location[i][j] = new Pawn("b", i, j++, "pawn");
-  } else if (fen_string.charAt(index) === "P") {
-    Pieces_location[i][j] = new Pawn("w", i, j++, "pawn");
-  } else if (fen_string.charAt(index) === "/") {
-    Pieces_location.push([]);
-    i++;
-    j = 0;
-  } else if (
-    fen_string.charAt(index) >= "1" &&
-    fen_string.charAt(index) <= "8"
-  ) {
-    for (let count = 0; count < Number(fen_string.charAt(index)); count++) {
-      Pieces_location[i][j++] = null;
-    }
-  } else if (fen_string.charAt(index) === "R") {
-    Pieces_location[i][j] = new Rook("w", i, j++, "rook");
-  } else if (fen_string.charAt(index) === "N") {
-    Pieces_location[i][j] = new Knight("w", i, j++, "knight");
-  } else if (fen_string.charAt(index) === "B") {
-    Pieces_location[i][j] = new Bishop("w", i, j++, "bishop");
-  } else if (fen_string.charAt(index) === "Q") {
-    Pieces_location[i][j] = new Queen("w", i, j++, "queen");
-  } else if (fen_string.charAt(index) === "K") {
-    Pieces_location[i][j] = new King("w", i, j, "king");
-    whiteKing = Pieces_location[i][j++];
-  } else if (fen_string.charAt(index) === "B") {
-    Pieces_location[i][j] = new Bishop("w", i, j++, "bishop");
-  } else if (fen_string.charAt(index) === "K") {
-    Pieces_location[i][j] = new Queen("w", i, j++, "knight");
-  } else if (fen_string.charAt(index) === "R") {
-    Pieces_location[i][j] = new Rook("w", i, j++, "rook");
-  }
-  index++;
-}
+// let fen_string = "8/7p/4pkp1/8/4PKP1/8/7P/8";
+// let fen_string_len = fen_string.length;
+// let i = 0,
+//   j = 0,
+//   index = 0;
+// Pieces_location.push([]);
+// while (fen_string_len >= index) {
+// console.log(i, j);
+//   if (fen_string.charAt(index) === "r") {
+//     Pieces_location[i][j] = new Rook("b", i, j++, "rook");
+//   } else if (fen_string.charAt(index) === "n") {
+//     Pieces_location[i][j] = new Knight("b", i, j++, "knight");
+//   } else if (fen_string.charAt(index) === "b") {
+//     Pieces_location[i][j] = new Bishop("b", i, j++, "bishop");
+//   } else if (fen_string.charAt(index) === "q") {
+//     Pieces_location[i][j] = new Queen("b", i, j++, "queen");
+//   } else if (fen_string.charAt(index) === "k") {
+//     Pieces_location[i][j] = new King("b", i, j, "king");
+//     blackKing = Pieces_location[i][j++];
+//   } else if (fen_string.charAt(index) === "b") {
+//     Pieces_location[i][j] = new Bishop("b", i, j++, "bishop");
+//   } else if (fen_string.charAt(index) === "n") {
+//     Pieces_location[i][j] = new Knight("b", i, j++, "knight");
+//   } else if (fen_string.charAt(index) === "r") {
+//     Pieces_location[i][j] = new Rook("b", i, j++, "rook");
+//   } else if (fen_string.charAt(index) === "p") {
+//     Pieces_location[i][j] = new Pawn("b", i, j++, "pawn");
+//   } else if (fen_string.charAt(index) === "P") {
+//     Pieces_location[i][j] = new Pawn("w", i, j++, "pawn");
+//   } else if (fen_string.charAt(index) === "/") {
+//     Pieces_location.push([]);
+//     i++;
+//     j = 0;
+//   } else if (
+//     fen_string.charAt(index) >= "1" &&
+//     fen_string.charAt(index) <= "8"
+//   ) {
+//     for (let count = 0; count < Number(fen_string.charAt(index)); count++) {
+//       Pieces_location[i][j++] = null;
+//     }
+//   } else if (fen_string.charAt(index) === "R") {
+//     Pieces_location[i][j] = new Rook("w", i, j++, "rook");
+//   } else if (fen_string.charAt(index) === "N") {
+//     Pieces_location[i][j] = new Knight("w", i, j++, "knight");
+//   } else if (fen_string.charAt(index) === "B") {
+//     Pieces_location[i][j] = new Bishop("w", i, j++, "bishop");
+//   } else if (fen_string.charAt(index) === "Q") {
+//     Pieces_location[i][j] = new Queen("w", i, j++, "queen");
+//   } else if (fen_string.charAt(index) === "K") {
+//     Pieces_location[i][j] = new King("w", i, j, "king");
+//     whiteKing = Pieces_location[i][j++];
+//   } else if (fen_string.charAt(index) === "B") {
+//     Pieces_location[i][j] = new Bishop("w", i, j++, "bishop");
+//   } else if (fen_string.charAt(index) === "K") {
+//     Pieces_location[i][j] = new Queen("w", i, j++, "knight");
+//   } else if (fen_string.charAt(index) === "R") {
+//     Pieces_location[i][j] = new Rook("w", i, j++, "rook");
+//   }
+//   index++;
+// }
 
 // for (let i = 0; i < 8; i++) {
 //   Pieces_location.push([]);
@@ -720,4 +705,4 @@ while (fen_string_len >= index) {
 //   }
 // }
 
-export default Pieces_location;
+// export default Pieces_location;

@@ -6,44 +6,26 @@ import {
   StyleSheet,
 } from "react-native";
 import React, { useMemo, useState } from "react";
-import {
-  Bishop,
-  King,
-  Knight,
-  Pawn,
-  Piece,
-  Queen,
-  Rook,
-  blackKing,
-  whiteKing,
-} from "./Pieces";
-import { FontAwesome5 } from "@expo/vector-icons";
-import Pieces_location from "./Pieces";
 import { PIECE_IMAGES, Piece_type } from "./Piece_images";
+import { Game } from "./Game";
+let game = new Game();
 export default function Board() {
+  const [activePiece, setactivePiece] = useState(false);
   let Boxes = [];
-  const [activePiece, setactivePiece] = useState<
-    Bishop | King | Knight | Pawn | Queen | Rook | null
-  >(null);
 
   const Move = (x: number, y: number) => {
-    if (activePiece !== null) {
-      let prev_loc_of_x_and_y: number[] = activePiece.getLocation();
-      let prev_x_loc = prev_loc_of_x_and_y[0];
-      let prev_y_loc = prev_loc_of_x_and_y[1];
-      if (activePiece.isValidMove(x, y) && !activePiece.isObstructed(x, y)) {
-        Pieces_location[prev_x_loc][prev_y_loc] = null;
-        activePiece.moveTo(x, y);
-        Pieces_location[x][y] = activePiece;
-        if (activePiece.getColor() === "w") {
-          if (blackKing.isKingChecked()) console.log("black in check");
-        } else {
-          if (whiteKing.isKingChecked()) console.log("white in check");
-        }
-        setactivePiece(null);
-      } else setactivePiece(null);
-    } else if (Pieces_location[x][y] !== null) {
-      setactivePiece(Pieces_location[x][y]);
+    if (activePiece) {
+      game.makeMove(x, y);
+      setactivePiece(false);
+    } else {
+      if (game.getPiece(x, y) === null) return;
+      if (
+        (game.getPiece(x, y)?.getColor() === "w") !==
+        game.getCurrentTurn().isPlayerWhite()
+      )
+        return;
+      game.setActivePiece(x, y);
+      setactivePiece(true);
     }
   };
 
@@ -66,7 +48,7 @@ export default function Board() {
             justifyContent: "center",
             alignItems: "center",
             borderRadius:
-              activePiece !== null && Pieces_location[x][y] === activePiece
+              activePiece && game.getPiece(x, y) === game.getActivePiece()
                 ? 15
                 : 0,
           }}
@@ -79,8 +61,8 @@ export default function Board() {
 
   for (let i: number = 0; i < 8; i++) {
     for (let j: number = 0; j < 8; j++) {
-      if (Pieces_location[i][j] !== null) {
-        let piece = Pieces_location[i][j];
+      if (game.getPiece(i, j) !== null) {
+        let piece = game.getPiece(i, j);
         let Piece_image_name = `${piece?.getColor()}_${piece?.getName()}`;
         Boxes.push(
           <Box
