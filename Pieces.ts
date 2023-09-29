@@ -60,6 +60,17 @@ export class Piece {
     }
     return false;
   }
+
+  isPinned(board: Board, king: King, x: number, y: number): boolean {
+    let somePiece = board.getPieceFromBoard(this.x_loc, this.y_loc);
+    let destPiece = board.getPieceFromBoard(x, y);
+    board.setPieceinBoard(this.x_loc, this.y_loc, null);
+    board.setPieceinBoard(x, y, somePiece);
+    let res = king.isKingChecked(board);
+    board.setPieceinBoard(this.x_loc, this.y_loc, somePiece);
+    board.setPieceinBoard(x, y, destPiece);
+    return res;
+  }
 }
 
 export class King extends Piece {
@@ -414,6 +425,9 @@ export class King extends Piece {
     }
     console.log("number", number_of_pieces_threatening);
     return number_of_pieces_threatening > 0;
+  }
+  isPinned(board: Board, king: King): boolean {
+    return false;
   }
 }
 

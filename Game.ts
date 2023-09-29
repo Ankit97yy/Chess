@@ -24,7 +24,8 @@ export class Game {
       return;
     if (
       this.active_piece.isValidMove(x, y) &&
-      !this.active_piece.isObstructed(x, y, this.Board)
+      !this.active_piece.isObstructed(x, y, this.Board) &&
+      !this.active_piece.isPinned(this.Board, this.current_turn.getKing(), x, y)
     ) {
       let prev_loc_of_x_and_y: number[] = this.active_piece.getLocation();
       let prev_x_loc = prev_loc_of_x_and_y[0];
