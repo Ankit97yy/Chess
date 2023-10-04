@@ -11,7 +11,7 @@ type PieceParams = {
   name: string;
 };
 
-export class Piece {
+export abstract class Piece {
   protected color: string;
   protected x_loc: number;
   protected y_loc: number;
@@ -26,10 +26,12 @@ export class Piece {
     this.alive = true;
   }
 
-  moveTo(x_loc: number, y_loc: number) {
+  moveTo(x_loc: number, y_loc: number, board: Board) {
     console.log("something moved");
+    board.setPieceinBoard(this.x_loc, this.y_loc, null);
     this.x_loc = x_loc;
     this.y_loc = y_loc;
+    board.setPieceinBoard(x_loc, y_loc, this);
   }
 
   getLocation(): number[] {
@@ -64,21 +66,36 @@ export class Piece {
   isPinned(board: Board, king: King, x: number, y: number): boolean {
     let somePiece = board.getPieceFromBoard(this.x_loc, this.y_loc);
     let destPiece = board.getPieceFromBoard(x, y);
+    let prev_x = this.x_loc;
+    let prev_y = this.y_loc;
     board.setPieceinBoard(this.x_loc, this.y_loc, null);
+    this.x_loc = x;
+    this.y_loc = y;
     board.setPieceinBoard(x, y, somePiece);
     let res = king.isKingChecked(board);
-    board.setPieceinBoard(this.x_loc, this.y_loc, somePiece);
+    this.x_loc = prev_x;
+    this.y_loc = prev_y;
+    //
+    board.setPieceinBoard(prev_x, prev_y, somePiece);
     board.setPieceinBoard(x, y, destPiece);
     return res;
   }
+  abstract isValidMove(x_loc: number, y_loc: number): boolean;
 }
 
 export class King extends Piece {
+  is_moving_for_the_first_time: boolean = true;
   constructor(color: string, x: number, y: number, name: string) {
     super(color, x, y, name);
   }
   isValidMove(x_loc: number, y_loc: number): boolean {
     if (x_loc - this.x_loc == 0 && y_loc - this.y_loc == 0) return false;
+    if (
+      x_loc - this.x_loc === 0 &&
+      Math.abs(this.y_loc - y_loc) === 2 &&
+      this.is_moving_for_the_first_time
+    )
+      return true;
     if (Math.abs(x_loc - this.x_loc) > 1 || Math.abs(y_loc - this.y_loc) > 1)
       return false;
     else {
@@ -423,11 +440,121 @@ export class King extends Piece {
           number_of_pieces_threatening++;
       }
     }
-    console.log("number", number_of_pieces_threatening);
+    console.log("number", number_of_pieces_threatening, this.color);
     return number_of_pieces_threatening > 0;
   }
-  isPinned(board: Board, king: King): boolean {
+  // isPinned(board: Board, king: King): boolean {
+  //   return false;
+  // }
+  isObstructed(x_loc: number, y_loc: number, board: Board): boolean {
+    let x = this.x_loc;
+    let y = this.y_loc;
+
+    if (Math.abs(this.y_loc - y_loc) === 2) {
+      if (y_loc === this.y_loc + 2) {
+        let somePiece = board.getPieceFromBoard(this.x_loc, 7);
+        if (somePiece === null) return true;
+        if (
+          somePiece?.getColor() === this.color &&
+          somePiece.getName() === "rook"
+        ) {
+          let res = somePiece.isObstructed(this.x_loc, this.y_loc + 1, board);
+          console.log(
+            "🚀 ~ file: Pieces.ts:455 ~ King ~ isObstructed ~ res:",
+            res
+          );
+          return res;
+        }
+      }
+      if (y_loc === this.y_loc - 2) {
+        let somePiece = board.getPieceFromBoard(this.x_loc, 0);
+        if (somePiece === null) return true;
+        if (
+          somePiece?.getColor() === this.color &&
+          somePiece.getName() === "rook"
+        ) {
+          let res = somePiece.isObstructed(this.x_loc, this.y_loc - 1, board);
+          console.log(
+            "🚀 ~ file: Pieces.ts:467 ~ King ~ isObstructed ~ res:",
+            res
+          );
+          return res;
+        }
+      }
+    }
+
+    while (x !== x_loc || y !== y_loc) {
+      if (x > x_loc) x--;
+      else if (x < x_loc) x++;
+      if (y > y_loc) y--;
+      else if (y < y_loc) y++;
+      if (x == x_loc && y == y_loc) {
+        if (board.getPieceFromBoard(x, y)?.getColor() === this.color)
+          return true;
+        else return false;
+      }
+      if (board.getPieceFromBoard(x, y) !== null) return true;
+    }
+
     return false;
+  }
+
+  isPinned(board: Board, king: King, x: number, y: number): boolean {
+    let x_pos = this.x_loc;
+    let y_pos = this.y_loc;
+    let somePiece = board.getPieceFromBoard(this.x_loc, this.y_loc);
+    let destPiece = board.getPieceFromBoard(x, y);
+    let prev_x = this.x_loc;
+    let prev_y = this.y_loc;
+    let res = false;
+    while (x !== x_pos || y !== y_pos) {
+      board.setPieceinBoard(x_pos, y_pos, null);
+      if (x_pos > x) x_pos--;
+      else if (x_pos < x) x_pos++;
+      if (y_pos > y) y_pos--;
+      else if (y_pos < y) y_pos++;
+      this.x_loc = x_pos;
+      this.y_loc = y_pos;
+      board.setPieceinBoard(x_pos, y_pos, somePiece);
+      res = king.isKingChecked(board);
+      if (res) {
+        board.setPieceinBoard(x_pos, y_pos, null);
+        break;
+      }
+    }
+    this.x_loc = prev_x;
+    this.y_loc = prev_y;
+    //
+    board.setPieceinBoard(prev_x, prev_y, somePiece);
+    board.setPieceinBoard(x, y, destPiece);
+    return res;
+  }
+
+  moveTo(x_loc: number, y_loc: number, board: Board): void {
+    if (Math.abs(this.y_loc - y_loc) === 2) {
+      if (y_loc === this.y_loc + 2) {
+        let rook = board.getPieceFromBoard(this.x_loc, 7);
+        rook?.moveTo(this.x_loc, this.y_loc + 1, board);
+        board.setPieceinBoard(this.x_loc, this.y_loc, null);
+        this.x_loc = x_loc;
+        this.y_loc = y_loc;
+        board.setPieceinBoard(x_loc, y_loc, this);
+      } else if (y_loc === this.y_loc - 2) {
+        let rook = board.getPieceFromBoard(this.x_loc, 0);
+        rook?.moveTo(this.x_loc, this.y_loc - 1, board);
+        board.setPieceinBoard(this.x_loc, this.y_loc, null);
+        this.x_loc = x_loc;
+        this.y_loc = y_loc;
+        board.setPieceinBoard(x_loc, y_loc, this);
+      }
+    } else {
+      board.setPieceinBoard(this.x_loc, this.y_loc, null);
+      this.x_loc = x_loc;
+      this.y_loc = y_loc;
+      board.setPieceinBoard(x_loc, y_loc, this);
+    }
+    if (this.is_moving_for_the_first_time)
+      this.is_moving_for_the_first_time = false;
   }
 }
 
@@ -474,6 +601,7 @@ export class Queen extends Piece {
   }
 
   isValidMove(x_loc: number, y_loc: number): boolean {
+    if (this.x_loc === x_loc && this.y_loc === y_loc) return false;
     if (
       Math.abs(x_loc - this.x_loc) === Math.abs(y_loc - this.y_loc) ||
       // (y_loc == this.y_loc && x_loc <= this.x_loc + 1 && x_loc > this.x_loc) || //!check this condition
@@ -490,9 +618,11 @@ export class Pawn extends Piece {
   constructor(color: string, x: number, y: number, name: string) {
     super(color, x, y, name);
   }
-  moveTo(x_loc: number, y_loc: number): void {
+  moveTo(x_loc: number, y_loc: number, board: Board): void {
+    board.setPieceinBoard(this.x_loc, this.y_loc, null);
     this.x_loc = x_loc;
     this.y_loc = y_loc;
+    board.setPieceinBoard(x_loc, y_loc, this);
     if (this.isFirstMove) this.isFirstMove = false;
   }
   isObstructed(x_loc: number, y_loc: number, board: Board): boolean {

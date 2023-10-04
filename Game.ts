@@ -31,7 +31,7 @@ export class Game {
       let prev_x_loc = prev_loc_of_x_and_y[0];
       let prev_y_loc = prev_loc_of_x_and_y[1];
       this.Board.setPieceinBoard(prev_x_loc, prev_y_loc, null);
-      this.active_piece.moveTo(x, y);
+      this.active_piece.moveTo(x, y, this.Board);
       this.Board.setPieceinBoard(x, y, this.active_piece);
       this.lookforCheck();
       this.changeTurn();

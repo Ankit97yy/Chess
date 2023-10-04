@@ -82,7 +82,7 @@ export default function Board() {
             y={j}
           />
         );
-      } else Boxes.push(<Box x={i} y={j} />);
+      } else Boxes.push(<Box key={`${i}_${j}`} x={i} y={j} />);
     }
   }
   return (

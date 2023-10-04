@@ -10,14 +10,14 @@ export class Board {
   }
 
   createBoard() {
-    let fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+    let fen_string = "rnb1kbnr/pppppppp/3q4/8/8/8/PPP1PPPP/R3KBNR";
     let fen_string_len = fen_string.length;
     let i = 0;
     let j = 0;
     let index = 0;
     this.squares.push([]);
     while (fen_string_len >= index) {
-      // console.log(i, j);
+      // console.log(i, j)
       if (fen_string.charAt(index) === "r") {
         this.squares[i][j] = new Rook("b", i, j++, "rook");
       } else if (fen_string.charAt(index) === "n") {
