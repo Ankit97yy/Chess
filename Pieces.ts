@@ -110,10 +110,9 @@ export class King extends Piece {
     piece_name_2: string | null,
     board: Board
   ): number {
-    // console.log(x, y, piece_name_1, piece_name_2);
     let somePiece = board.getPieceFromBoard(x, y);
-    if (somePiece !== null && somePiece.getColor() === this.color) return 2;
-    if (somePiece !== null && somePiece.getColor() !== this.color) {
+    if (somePiece !== null && somePiece?.getColor() === this.color) return 2;
+    if (somePiece !== null && somePiece?.getColor() !== this.color) {
       if (piece_name_2 === null) {
         if (somePiece.getName() === piece_name_1) return 1;
       } else {
@@ -440,6 +439,99 @@ export class King extends Piece {
           number_of_pieces_threatening++;
       }
     }
+    if (this.x_loc < 7) {
+      if (
+        this.isKingThreatened(
+          this.x_loc + 1,
+          this.y_loc,
+          "king",
+          null,
+          board
+        ) === 1
+      )
+        number_of_pieces_threatening++;
+      if (this.y_loc < 7)
+        if (
+          this.isKingThreatened(
+            this.x_loc + 1,
+            this.y_loc + 1,
+            "king",
+            null,
+            board
+          ) === 1
+        )
+          number_of_pieces_threatening++;
+      if (this.y_loc > 0)
+        if (
+          this.isKingThreatened(
+            this.x_loc + 1,
+            this.y_loc - 1,
+            "king",
+            null,
+            board
+          ) === 1
+        )
+          number_of_pieces_threatening++;
+    }
+    if (this.x_loc > 0) {
+      if (
+        this.isKingThreatened(
+          this.x_loc - 1,
+          this.y_loc,
+          "king",
+          null,
+          board
+        ) === 1
+      )
+        number_of_pieces_threatening++;
+      if (this.y_loc < 7)
+        if (
+          this.isKingThreatened(
+            this.x_loc - 1,
+            this.y_loc + 1,
+            "king",
+            null,
+            board
+          ) === 1
+        )
+          number_of_pieces_threatening++;
+      if (this.y_loc > 0)
+        if (
+          this.isKingThreatened(
+            this.x_loc - 1,
+            this.y_loc - 1,
+            "king",
+            null,
+            board
+          ) === 1
+        )
+          number_of_pieces_threatening++;
+    }
+    if (this.y_loc < 7) {
+      if (
+        this.isKingThreatened(
+          this.x_loc,
+          this.y_loc + 1,
+          "king",
+          null,
+          board
+        ) === 1
+      )
+        number_of_pieces_threatening++;
+    }
+    if (this.y_loc > 0) {
+      if (
+        this.isKingThreatened(
+          this.x_loc,
+          this.y_loc - 1,
+          "king",
+          null,
+          board
+        ) === 1
+      )
+        number_of_pieces_threatening++;
+    }
+
     console.log("number", number_of_pieces_threatening, this.color);
     return number_of_pieces_threatening > 0;
   }
