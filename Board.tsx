@@ -8,14 +8,18 @@ import {
 import React, { useMemo, useState } from "react";
 import { PIECE_IMAGES, Piece_type } from "./Piece_images";
 import { Game } from "./Game";
+import CountDown from "./CountDown";
+import dayjs, { Dayjs } from "dayjs";
 let game = new Game();
 export default function Board() {
   const [activePiece, setactivePiece] = useState(false);
+  const [currentturn, setcurrentturn] = useState<null | string>(null);
   let Boxes = [];
 
   const Move = (x: number, y: number) => {
     if (activePiece) {
-      game.makeMove(x, y);
+      if (game.makeMove(x, y))
+        currentturn === "p2" ? setcurrentturn("p1") : setcurrentturn("p2");
       setactivePiece(false);
     } else {
       if (game.getPiece(x, y) === null) return;
@@ -26,6 +30,13 @@ export default function Board() {
         return;
       game.setActivePiece(x, y);
       setactivePiece(true);
+    }
+  };
+
+  const checkCountdown = (time: Dayjs) => {
+    if (time.get("minute") === 0 && time.get("second") === 0) {
+      console.log("game over");
+      setcurrentturn(null);
     }
   };
 
@@ -75,7 +86,18 @@ export default function Board() {
               // /
               <Image
                 source={PIECE_IMAGES[Piece_image_name]}
-                style={{ height: 42, width: 42 }}
+                style={
+                  piece?.getColor() === "b"
+                    ? {
+                        transform: [{ rotate: "180deg" }],
+                        height: 42,
+                        width: 42,
+                      }
+                    : {
+                        height: 42,
+                        width: 42,
+                      }
+                }
               />
             }
             x={i}
@@ -86,18 +108,32 @@ export default function Board() {
     }
   }
   return (
-    <View
-      style={{
-        borderColor: "black",
-        borderWidth: 1,
-        width: 346,
-        height: 354,
-        flexDirection: "row",
-        flexWrap: "wrap",
-      }}
-    >
-      {Boxes}
-    </View>
+    <>
+      <CountDown
+        direction={"up"}
+        checkCountdown={checkCountdown}
+        start={currentturn === "p2"}
+        startTime={dayjs().minute(10).second(0)}
+      />
+      <View
+        style={{
+          borderColor: "black",
+          borderWidth: 1,
+          width: 346,
+          height: 354,
+          flexDirection: "row",
+          flexWrap: "wrap",
+        }}
+      >
+        {Boxes}
+      </View>
+      <CountDown
+        direction={"down"}
+        checkCountdown={checkCountdown}
+        start={currentturn === "p1"}
+        startTime={dayjs().minute(10).second(0)}
+      />
+    </>
   );
 }
 // const style = StyleSheet.create({

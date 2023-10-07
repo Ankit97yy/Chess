@@ -15,13 +15,13 @@ export class Game {
     this.current_turn = this.player_1;
   }
 
-  makeMove(x: number, y: number) {
-    if (this.active_piece === null) return;
+  makeMove(x: number, y: number): boolean {
+    if (this.active_piece === null) return false;
     if (
       this.current_turn.isPlayerWhite() !==
       (this.active_piece?.getColor() === "w")
     )
-      return;
+      return false;
     if (
       this.active_piece.isValidMove(x, y) &&
       !this.active_piece.isObstructed(x, y, this.Board) &&
@@ -35,8 +35,11 @@ export class Game {
       this.Board.setPieceinBoard(x, y, this.active_piece);
       this.lookforCheck();
       this.changeTurn();
+      this.active_piece = null;
+      return true;
     }
     this.active_piece = null;
+    return false;
   }
   setActivePiece(x: number, y: number) {
     let somePiece = this.Board.getPieceFromBoard(x, y);
