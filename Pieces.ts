@@ -27,8 +27,10 @@ export abstract class Piece {
   }
 
   moveTo(x_loc: number, y_loc: number, board: Board) {
-    console.log("something moved");
     board.setPieceinBoard(this.x_loc, this.y_loc, null);
+    if (board.getPieceFromBoard(x_loc, y_loc) !== null) {
+      board.getPieceFromBoard(x_loc, y_loc)?.killThisPiece();
+    }
     this.x_loc = x_loc;
     this.y_loc = y_loc;
     board.setPieceinBoard(x_loc, y_loc, this);
@@ -72,13 +74,21 @@ export abstract class Piece {
     this.x_loc = x;
     this.y_loc = y;
     board.setPieceinBoard(x, y, somePiece);
-    let res = king.isKingChecked(board);
+    let res = king.isKingChecked(board).length > 0;
+    console.log("🚀 ~ file: Pieces.ts:77 ~ Piece ~ isPinned ~ res:", res);
     this.x_loc = prev_x;
     this.y_loc = prev_y;
     //
     board.setPieceinBoard(prev_x, prev_y, somePiece);
     board.setPieceinBoard(x, y, destPiece);
     return res;
+  }
+  killThisPiece() {
+    this.alive = false;
+  }
+
+  isAlive() {
+    return this.alive;
   }
   abstract isValidMove(x_loc: number, y_loc: number): boolean;
 }
@@ -90,6 +100,7 @@ export class King extends Piece {
   }
   isValidMove(x_loc: number, y_loc: number): boolean {
     if (x_loc - this.x_loc == 0 && y_loc - this.y_loc == 0) return false;
+    if (x_loc > 7 || x_loc < 0 || y_loc > 7 || y_loc < 0) return false;
     if (
       x_loc - this.x_loc === 0 &&
       Math.abs(this.y_loc - y_loc) === 2 &&
@@ -132,8 +143,8 @@ export class King extends Piece {
     return 0;
   }
 
-  isKingChecked(board: Board): boolean {
-    let number_of_pieces_threatening = 0;
+  isKingChecked(board: Board): any {
+    let attacking_piece_positions = [];
     if (this.x_loc <= 5 && this.y_loc - 1 >= 0) {
       if (
         this.isKingThreatened(
@@ -144,7 +155,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc + 2,
+          y_pos: this.y_loc - 1,
+        });
     }
     if (this.x_loc <= 5 && this.y_loc + 1 <= 7) {
       if (
@@ -156,7 +170,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc + 2,
+          y_pos: this.y_loc + 1,
+        });
     }
     if (this.x_loc >= 2 && this.y_loc - 1 >= 0) {
       if (
@@ -168,7 +185,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc - 2,
+          y_pos: this.y_loc - 1,
+        });
     }
     if (this.x_loc >= 2 && this.y_loc + 1 <= 7) {
       if (
@@ -180,7 +200,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc - 2,
+          y_pos: this.y_loc + 1,
+        });
     }
     if (this.y_loc <= 5 && this.x_loc - 1 >= 0) {
       if (
@@ -192,7 +215,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc - 1,
+          y_pos: this.y_loc + 2,
+        });
     }
     if (this.y_loc <= 5 && this.x_loc + 1 <= 7) {
       if (
@@ -204,7 +230,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc + 1,
+          y_pos: this.y_loc + 2,
+        });
     }
     if (this.y_loc >= 2 && this.x_loc - 1 >= 0) {
       if (
@@ -216,7 +245,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc - 1,
+          y_pos: this.y_loc - 2,
+        });
     }
     if (this.y_loc >= 2 && this.x_loc + 1 <= 7) {
       if (
@@ -228,7 +260,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc + 1,
+          y_pos: this.y_loc - 2,
+        });
     }
 
     let x = 1;
@@ -244,7 +279,10 @@ export class King extends Piece {
       );
 
       if (result === 1) {
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc + x,
+          y_pos: this.y_loc,
+        });
         break;
       } else if (result === 2)
         // not (rook or queen) but some other piece;
@@ -264,7 +302,10 @@ export class King extends Piece {
         board
       );
       if (result === 1) {
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc,
+          y_pos: this.y_loc + y,
+        });
         break;
       } else if (result === 2)
         // not (rook or queen) but some other piece;
@@ -284,7 +325,10 @@ export class King extends Piece {
         board
       );
       if (result === 1) {
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc - x,
+          y_pos: this.y_loc,
+        });
         break;
       } else if (result === 2)
         // not (rook or queen) but some other piece;
@@ -303,7 +347,10 @@ export class King extends Piece {
         board
       );
       if (result === 1) {
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc,
+          y_pos: this.y_loc - y,
+        });
         break;
       } else if (result === 2)
         // not (rook or queen) but some other piece;
@@ -322,7 +369,10 @@ export class King extends Piece {
         board
       );
       if (result === 1) {
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc + x,
+          y_pos: this.y_loc + y,
+        });
         break;
       } else if (result === 2)
         // not (bishop or queen) but some other piece;
@@ -341,7 +391,10 @@ export class King extends Piece {
         board
       );
       if (result === 1) {
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc + x,
+          y_pos: this.y_loc - y,
+        });
         break;
       } else if (result === 2)
         // not (bishop or queen) but some other piece;
@@ -360,7 +413,10 @@ export class King extends Piece {
         board
       );
       if (result === 1) {
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc - x,
+          y_pos: this.y_loc + y,
+        });
         break;
       } else if (result === 2)
         // not (bishop or queen) but some other piece;
@@ -379,7 +435,10 @@ export class King extends Piece {
         board
       );
       if (result === 1) {
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc - x,
+          y_pos: this.y_loc - y,
+        });
         break;
       } else if (result === 2)
         // not (bishop or queen) but some other piece;
@@ -398,7 +457,10 @@ export class King extends Piece {
             board
           ) === 1
         )
-          number_of_pieces_threatening++;
+          attacking_piece_positions.push({
+            x_pos: this.x_loc - 1,
+            y_pos: this.y_loc + 1,
+          });
       }
       if (this.y_loc >= 1) {
         if (
@@ -410,7 +472,10 @@ export class King extends Piece {
             board
           ) === 1
         )
-          number_of_pieces_threatening++;
+          attacking_piece_positions.push({
+            x_pos: this.x_loc - 1,
+            y_pos: this.y_loc - 1,
+          });
       }
     }
     if (this.color === "b" && this.x_loc <= 6) {
@@ -424,7 +489,10 @@ export class King extends Piece {
             board
           ) === 1
         )
-          number_of_pieces_threatening++;
+          attacking_piece_positions.push({
+            x_pos: this.x_loc + 1,
+            y_pos: this.y_loc + 1,
+          });
       }
       if (this.y_loc >= 1) {
         if (
@@ -436,7 +504,10 @@ export class King extends Piece {
             board
           ) === 1
         )
-          number_of_pieces_threatening++;
+          attacking_piece_positions.push({
+            x_pos: this.x_loc + 1,
+            y_pos: this.y_loc - 1,
+          });
       }
     }
     if (this.x_loc < 7) {
@@ -449,7 +520,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc + 1,
+          y_pos: this.y_loc,
+        });
       if (this.y_loc < 7)
         if (
           this.isKingThreatened(
@@ -460,7 +534,10 @@ export class King extends Piece {
             board
           ) === 1
         )
-          number_of_pieces_threatening++;
+          attacking_piece_positions.push({
+            x_pos: this.x_loc + 1,
+            y_pos: this.y_loc + 1,
+          });
       if (this.y_loc > 0)
         if (
           this.isKingThreatened(
@@ -471,7 +548,10 @@ export class King extends Piece {
             board
           ) === 1
         )
-          number_of_pieces_threatening++;
+          attacking_piece_positions.push({
+            x_pos: this.x_loc + 1,
+            y_pos: this.y_loc - 1,
+          });
     }
     if (this.x_loc > 0) {
       if (
@@ -483,7 +563,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc - 1,
+          y_pos: this.y_loc,
+        });
       if (this.y_loc < 7)
         if (
           this.isKingThreatened(
@@ -494,7 +577,10 @@ export class King extends Piece {
             board
           ) === 1
         )
-          number_of_pieces_threatening++;
+          attacking_piece_positions.push({
+            x_pos: this.x_loc - 1,
+            y_pos: this.y_loc + 1,
+          });
       if (this.y_loc > 0)
         if (
           this.isKingThreatened(
@@ -505,7 +591,10 @@ export class King extends Piece {
             board
           ) === 1
         )
-          number_of_pieces_threatening++;
+          attacking_piece_positions.push({
+            x_pos: this.x_loc - 1,
+            y_pos: this.y_loc - 1,
+          });
     }
     if (this.y_loc < 7) {
       if (
@@ -517,7 +606,10 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc,
+          y_pos: this.y_loc + 1,
+        });
     }
     if (this.y_loc > 0) {
       if (
@@ -529,11 +621,17 @@ export class King extends Piece {
           board
         ) === 1
       )
-        number_of_pieces_threatening++;
+        attacking_piece_positions.push({
+          x_pos: this.x_loc,
+          y_pos: this.y_loc - 1,
+        });
     }
 
-    console.log("number", number_of_pieces_threatening, this.color);
-    return number_of_pieces_threatening > 0;
+    console.log(
+      "🚀 ~ file: Pieces.ts:621 ~ King ~ isKingChecked ~ attacking_piece_positions:",
+      attacking_piece_positions
+    );
+    return attacking_piece_positions;
   }
   // isPinned(board: Board, king: King): boolean {
   //   return false;
@@ -608,7 +706,7 @@ export class King extends Piece {
       this.x_loc = x_pos;
       this.y_loc = y_pos;
       board.setPieceinBoard(x_pos, y_pos, somePiece);
-      res = king.isKingChecked(board);
+      res = king.isKingChecked(board).length > 0;
       if (res) {
         board.setPieceinBoard(x_pos, y_pos, null);
         break;
@@ -623,6 +721,9 @@ export class King extends Piece {
   }
 
   moveTo(x_loc: number, y_loc: number, board: Board): void {
+    if (board.getPieceFromBoard(x_loc, y_loc) !== null) {
+      board.getPieceFromBoard(x_loc, y_loc)?.killThisPiece();
+    }
     if (Math.abs(this.y_loc - y_loc) === 2) {
       if (y_loc === this.y_loc + 2) {
         let rook = board.getPieceFromBoard(this.x_loc, 7);
@@ -656,6 +757,7 @@ export class Knight extends Piece {
   }
 
   isValidMove(x_loc: number, y_loc: number): boolean {
+    if (x_loc < 0 || y_loc < 0 || x_loc > 7 || y_loc > 7) return false;
     if (
       (Math.abs(y_loc - this.y_loc) === 2 &&
         Math.abs(x_loc - this.x_loc) === 1) ||
@@ -711,6 +813,9 @@ export class Pawn extends Piece {
     super(color, x, y, name);
   }
   moveTo(x_loc: number, y_loc: number, board: Board): void {
+    if (board.getPieceFromBoard(x_loc, y_loc) !== null) {
+      board.getPieceFromBoard(x_loc, y_loc)?.killThisPiece();
+    }
     board.setPieceinBoard(this.x_loc, this.y_loc, null);
     this.x_loc = x_loc;
     this.y_loc = y_loc;

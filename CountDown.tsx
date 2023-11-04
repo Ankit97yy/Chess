@@ -2,33 +2,42 @@ import { View, Text, StyleSheet } from "react-native";
 import React from "react";
 import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import { game } from "./Board";
 
 export default function CountDown({
-  start,
+  isWhite,
   checkCountdown,
   direction,
   startTime,
+  increment,
 }: {
-  start: boolean;
+  isWhite: boolean;
   checkCountdown: any;
   direction: string;
   startTime: Dayjs;
+  increment: number;
 }) {
   const [time, settime] = useState(startTime);
   const [timeCode, settimeCode] = useState(0);
   useEffect(() => {
-    if (start) startTimer();
-    else pauseTimer();
+    // console.log(direction, start);
+    if (game.getCurrentTurn().isPlayerWhite() === isWhite) {
+      startTimer();
+    } else pauseTimer();
+    // if (start) startTimer();
+    if (game.getCurrentTurn().isPlayerWhite() !== isWhite)
+      settime((prev) => prev.add(increment, "second"));
     return () => {
       pauseTimer();
     };
-  }, [start]);
+  }, [game.getCurrentTurn()]);
 
   useEffect(() => {
     checkCountdown(time);
   }, [time]);
 
   function pauseTimer() {
+    console.log("paused");
     clearInterval(timeCode);
   }
   function startTimer() {
@@ -45,7 +54,7 @@ export default function CountDown({
           direction === "up"
             ? {
                 transform: [{ rotate: "180deg" }],
-                color: "white",
+                color: "black",
                 fontSize: 20,
               }
             : styles.textstyle,
@@ -60,7 +69,7 @@ export default function CountDown({
 
 const styles = StyleSheet.create({
   textstyle: {
-    color: "white",
+    color: "black",
     fontSize: 20,
   },
 });

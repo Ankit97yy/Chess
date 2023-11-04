@@ -1,9 +1,11 @@
 import { King } from "./Pieces";
+import { PIECE } from "./Types";
 
 export class Player {
   protected player_name: string;
   protected isWhite: boolean;
   protected King: King;
+  protected players_all_pieces: PIECE[] = [];
 
   constructor(name: string, isWhite: boolean, king: King) {
     this.player_name = name;
@@ -19,5 +21,11 @@ export class Player {
   }
   getKing() {
     return this.King;
+  }
+  setPlayersAllPieces(piece: PIECE) {
+    this.players_all_pieces.push(piece);
+  }
+  getPlayersAllPieces() {
+    return this.players_all_pieces;
   }
 }

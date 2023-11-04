@@ -10,16 +10,18 @@ import { PIECE_IMAGES, Piece_type } from "./Piece_images";
 import { Game } from "./Game";
 import CountDown from "./CountDown";
 import dayjs, { Dayjs } from "dayjs";
-let game = new Game();
-export default function Board() {
+import { Button } from "react-native-paper";
+export let game = new Game();
+export default function Board({ route }: any) {
   const [activePiece, setactivePiece] = useState(false);
   const [currentturn, setcurrentturn] = useState<null | string>(null);
   let Boxes = [];
+  const { time, increment } = route.params;
 
   const Move = (x: number, y: number) => {
     if (activePiece) {
-      if (game.makeMove(x, y))
-        currentturn === "p2" ? setcurrentturn("p1") : setcurrentturn("p2");
+      game.makeMove(x, y);
+      // currentturn === "p2" ? setcurrentturn("p1") : setcurrentturn("p2");
       setactivePiece(false);
     } else {
       if (game.getPiece(x, y) === null) return;
@@ -108,13 +110,20 @@ export default function Board() {
     }
   }
   return (
-    <>
-      <CountDown
+    <View
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        flex: 1,
+      }}
+    >
+      {/* <CountDown
         direction={"up"}
+        increment={parseInt(increment)}
         checkCountdown={checkCountdown}
-        start={currentturn === "p2"}
-        startTime={dayjs().minute(10).second(0)}
-      />
+        isWhite={false}
+        startTime={dayjs().minute(parseInt(time)).second(0)}
+      /> */}
       <View
         style={{
           borderColor: "black",
@@ -127,13 +136,15 @@ export default function Board() {
       >
         {Boxes}
       </View>
-      <CountDown
+      {/* <CountDown
         direction={"down"}
+        increment={parseInt(increment)}
         checkCountdown={checkCountdown}
-        start={currentturn === "p1"}
-        startTime={dayjs().minute(10).second(0)}
-      />
-    </>
+        isWhite={true}
+        startTime={dayjs().minute(parseInt(time)).second(0)}
+      /> */}
+      <Button onPress={() => setcurrentturn(null)}>Stop game</Button>
+    </View>
   );
 }
 // const style = StyleSheet.create({
