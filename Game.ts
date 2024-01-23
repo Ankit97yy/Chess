@@ -9,6 +9,7 @@ export class Game {
   protected current_turn: Player;
   protected Board: Board;
   protected active_piece: PIECE = null;
+  game_over = false;
   constructor() {
     this.Board = new Board();
     this.player_1 = new Player("Ankit", true, this.Board.whiteKing);
@@ -21,42 +22,28 @@ export class Game {
           this.player_2.setPlayersAllPieces(this.Board.getPieceFromBoard(i, j));
       }
     }
-    // for (let i = 6; i < 8; i++) {
-    //   for (let j = 0; j < 8; j++) {
-    //     this.player_1.setPlayersAllPieces(this.Board.getPieceFromBoard(i, j));
-    //   }
-    // }
     this.current_turn = this.player_1;
   }
 
-  makeMove(x: number, y: number): boolean {
-    if (this.active_piece === null) return false;
+  handleMove(x: number, y: number) {
+    if (this.game_over) return;
+    if (this.active_piece === null) return;
     if (
       this.current_turn.isPlayerWhite() !==
       (this.active_piece?.getColor() === "w")
     )
-      return false;
-    if (
-      this.active_piece.isValidMove(x, y) &&
-      !this.active_piece.isObstructed(x, y, this.Board) &&
-      !this.active_piece.isPinned(this.Board, this.current_turn.getKing(), x, y)
-    ) {
-      console.log("valid move");
-      // let prev_loc_of_x_and_y: number[] = this.active_piece.getLocation();
-      // let prev_x_loc = prev_loc_of_x_and_y[0];
-      // let prev_y_loc = prev_loc_of_x_and_y[1];
-      // this.Board.setPieceinBoard(prev_x_loc, prev_y_loc, null);
-      this.active_piece.moveTo(x, y, this.Board);
-      // this.Board.setPieceinBoard(x, y, this.active_piece);
-      this.lookforCheck();
-      this.changeTurn();
-      this.active_piece = null;
-      return true; //
+      return;
+    if (this.canMoveTo(this.active_piece, x, y, this.current_turn.getKing())) {
+      this.current_turn.movePiece(this.active_piece, x, y, this.Board);
+      this.checkForCheckmate();
+      this.isGameOver() ? console.log("game over") : null; //!! checkForCheckmate is being called twice
+      this.changeTurn(); 
     }
     this.active_piece = null;
-    return false;
   }
+
   setActivePiece(x: number, y: number) {
+    if (this.game_over) return;
     let somePiece = this.Board.getPieceFromBoard(x, y);
     if ((somePiece?.getColor() === "w") !== this.current_turn.isPlayerWhite())
       return;
@@ -75,7 +62,13 @@ export class Game {
     return this.current_turn;
   }
 
-  lookforCheck() {
+  isGameOver(): boolean {
+    let res = this.checkForCheckmate();
+    this.game_over = res;
+    return res;
+  }
+
+  checkForCheckmate(): boolean {
     if (this.current_turn === this.player_1) {
       let attacking_pieces_pos = this.player_2
         .getKing()
@@ -91,7 +84,8 @@ export class Game {
           "🚀 ~ file: Game.ts:85 ~ Game ~ lookforCheck ~ checkmate:",
           checkmate
         );
-      }
+        return checkmate;
+      } else return false;
     } else {
       let attacking_pieces_pos = this.player_1
         .getKing()
@@ -107,7 +101,8 @@ export class Game {
           "🚀 ~ file: Game.ts:97 ~ Game ~ lookforCheck ~ checkmate:",
           checkmate
         );
-      }
+        return checkmate;
+      } else return false;
     }
   }
 
@@ -115,7 +110,7 @@ export class Game {
     player: Player,
     attacking_piece_pos_x: number,
     attacking_piece_pos_y: number
-  ) {
+  ): boolean {
     for (let i = 0; i < player.getPlayersAllPieces().length; i++) {
       let some_piece = player.getPlayersAllPieces()[i];
       if (!some_piece?.isAlive()) continue;

@@ -10,8 +10,8 @@ export class Board {
   }
 
   createBoard() {
-    let fen_string = "rnb1kbnr/pppppqpp/8/8/8/2NP1p2/PPP1P1PP/R1BQKBNR";
-    let fen_string_len = fen_string.length; //
+    let fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"; //
+    let fen_string_len = fen_string.length;
     let i = 0;
     let j = 0;
     let index = 0;

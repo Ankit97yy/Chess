@@ -1,3 +1,4 @@
+import { Board } from "./Chess_board";
 import { King } from "./Pieces";
 import { PIECE } from "./Types";
 
@@ -11,6 +12,10 @@ export class Player {
     this.player_name = name;
     this.isWhite = isWhite;
     this.King = king;
+  }
+
+  movePiece(somePiece: PIECE, x: number, y: number, board: Board) {
+    somePiece?.moveTo(x, y, board);
   }
 
   getPlayerName() {

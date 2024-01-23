@@ -19,19 +19,20 @@ export default function Board({ route }: any) {
   const { time, increment } = route.params;
 
   const Move = (x: number, y: number) => {
-    if (activePiece) {
-      game.makeMove(x, y);
-      // currentturn === "p2" ? setcurrentturn("p1") : setcurrentturn("p2");
-      setactivePiece(false);
-    } else {
-      if (game.getPiece(x, y) === null) return;
-      if (
-        (game.getPiece(x, y)?.getColor() === "w") !==
-        game.getCurrentTurn().isPlayerWhite()
-      )
-        return;
-      game.setActivePiece(x, y);
-      setactivePiece(true);
+    if (!game.game_over) {
+      if (activePiece) {
+        game.handleMove(x, y);
+        setactivePiece(false);
+      } else {
+        if (game.getPiece(x, y) === null) return;
+        if (
+          (game.getPiece(x, y)?.getColor() === "w") !==
+          game.getCurrentTurn().isPlayerWhite()
+        )
+          return;
+        game.setActivePiece(x, y);
+        setactivePiece(true);
+      }
     }
   };
 
@@ -115,6 +116,7 @@ export default function Board({ route }: any) {
         justifyContent: "center",
         alignItems: "center",
         flex: 1,
+        backgroundColor: "black",
       }}
     >
       {/* <CountDown
