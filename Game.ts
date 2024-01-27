@@ -34,11 +34,20 @@ export class Game {
     )
       return;
     if (this.canMoveTo(this.active_piece, x, y, this.current_turn.getKing())) {
+      console.log(this.Board.getEnpassantColor());
+      if (
+        this.current_turn.isPlayerWhite() !==
+        (this.Board.getEnpassantColor() === "w")
+      ) {
+        this.Board.cancelPassant();
+      }
       this.current_turn.movePiece(this.active_piece, x, y, this.Board);
       this.checkForCheckmate();
       this.isGameOver() ? console.log("game over") : null; //!! checkForCheckmate is being called twice
-      this.changeTurn(); 
+      this.changeTurn();
     }
+
+    console.log(this.Board.getEnpassantColor());
     this.active_piece = null;
   }
 
@@ -114,7 +123,6 @@ export class Game {
     for (let i = 0; i < player.getPlayersAllPieces().length; i++) {
       let some_piece = player.getPlayersAllPieces()[i];
       if (!some_piece?.isAlive()) continue;
-      console.log(some_piece?.getName(), some_piece?.getLocation());
       if (
         this.canMoveTo(
           some_piece,
@@ -505,7 +513,6 @@ export class Game {
       !some_piece.isObstructed(x1, y1, this.Board) &&
       !some_piece.isPinned(this.Board, king, x1, y1)
     ) {
-      console.log(some_piece, x1, y1, "$$$$");
       return true;
     } else return false;
   }

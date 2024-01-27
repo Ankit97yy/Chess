@@ -75,7 +75,6 @@ export abstract class Piece {
     this.y_loc = y;
     board.setPieceinBoard(x, y, somePiece);
     let res = king.isKingChecked(board).length > 0;
-    console.log("🚀 ~ file: Pieces.ts:77 ~ Piece ~ isPinned ~ res:", res);
     this.x_loc = prev_x;
     this.y_loc = prev_y;
     //
@@ -127,7 +126,6 @@ export class King extends Piece {
       if (piece_name_2 === null) {
         if (somePiece.getName() === piece_name_1) return 1;
       } else {
-        console.log(somePiece.getName(), "&&&");
         if (
           somePiece.getName() !== piece_name_1 &&
           somePiece.getName() !== piece_name_2
@@ -626,16 +624,11 @@ export class King extends Piece {
           y_pos: this.y_loc - 1,
         });
     }
-
-    console.log(
-      "🚀 ~ file: Pieces.ts:621 ~ King ~ isKingChecked ~ attacking_piece_positions:",
-      attacking_piece_positions
-    );
     return attacking_piece_positions;
   }
   // isPinned(board: Board, king: King): boolean {
   //   return false;
-  // }
+  // }//
   isObstructed(x_loc: number, y_loc: number, board: Board): boolean {
     let x = this.x_loc;
     let y = this.y_loc;
@@ -649,10 +642,7 @@ export class King extends Piece {
           somePiece.getName() === "rook"
         ) {
           let res = somePiece.isObstructed(this.x_loc, this.y_loc + 1, board);
-          console.log(
-            "🚀 ~ file: Pieces.ts:455 ~ King ~ isObstructed ~ res:",
-            res
-          );
+
           return res;
         }
       }
@@ -820,7 +810,47 @@ export class Pawn extends Piece {
     this.x_loc = x_loc;
     this.y_loc = y_loc;
     board.setPieceinBoard(x_loc, y_loc, this);
-    if (this.isFirstMove) this.isFirstMove = false;
+    if (this.getColor() === "w") {
+      if (
+        board.getEnpassantableSquare().x_pos === x_loc + 1 &&
+        board.getEnpassantableSquare().y_pos === y_loc
+      ) {
+        board.setPieceinBoard(
+          board.getEnpassantableSquare().x_pos,
+          board.getEnpassantableSquare().y_pos,
+          null
+        );
+        board
+          .getPieceFromBoard(
+            board.getEnpassantableSquare().x_pos,
+            board.getEnpassantableSquare().y_pos
+          )
+          ?.killThisPiece();
+      }
+    } else if (this.getColor() === "b") {
+      if (
+        board.getEnpassantableSquare().x_pos === x_loc - 1 &&
+        board.getEnpassantableSquare().y_pos === y_loc
+      ) {
+        board.setPieceinBoard(
+          board.getEnpassantableSquare().x_pos,
+          board.getEnpassantableSquare().y_pos,
+          null
+        );
+        board
+          .getPieceFromBoard(
+            board.getEnpassantableSquare().x_pos,
+            board.getEnpassantableSquare().y_pos
+          )
+          ?.killThisPiece();
+      }
+    }
+
+    if (this.isFirstMove) {
+      this.isFirstMove = false;
+      board.setEnpassantableSquare(x_loc, y_loc);
+      board.setEnpassantableColor(this.color);
+    }
   }
   isObstructed(x_loc: number, y_loc: number, board: Board): boolean {
     if (this.y_loc === y_loc) {
@@ -836,7 +866,23 @@ export class Pawn extends Piece {
         }
       }
     } else {
-      if (board.getPieceFromBoard(x_loc, y_loc) === null) return true;
+      if (board.getPieceFromBoard(x_loc, y_loc) === null) {
+        console.log(board.getEnpassantableSquare(), "(((((((((((((");
+        if (
+          this.getColor() === "w" &&
+          (board.getEnpassantableSquare().x_pos !== x_loc + 1 ||
+            board.getEnpassantableSquare().y_pos !== y_loc ||
+            board.getEnpassantColor() === "w")
+        )
+          return true;
+        if (
+          this.getColor() === "b" &&
+          (board.getEnpassantableSquare().x_pos !== x_loc - 1 ||
+            board.getEnpassantableSquare().y_pos !== y_loc ||
+            board.getEnpassantColor() === "b")
+        )
+          return true;
+      }
       if (
         board.getPieceFromBoard(x_loc, y_loc) !== null &&
         board.getPieceFromBoard(x_loc, y_loc)?.getColor() === this.color
@@ -874,6 +920,63 @@ export class Pawn extends Piece {
     ) {
       return true;
     } else return false;
+  }
+  isPinned(board: Board, king: King, x: number, y: number): boolean {
+    let enpassantMove: boolean = false;
+    let somePiece = board.getPieceFromBoard(this.x_loc, this.y_loc);
+    let destPiece = board.getPieceFromBoard(x, y);
+    let enPassantPiece: Piece | null = null;
+    let prev_x = this.x_loc;
+    let prev_y = this.y_loc; //
+    if (board.getPieceFromBoard(x, y) === null) {
+      // console.log(board.getEnpassantColor());//
+      if (
+        this.getColor() === "w" &&
+        board.getEnpassantableSquare().x_pos === x + 1 &&
+        board.getEnpassantableSquare().y_pos === y &&
+        board.getEnpassantColor() === "b"
+      ) {
+        enpassantMove = true;
+      } else if (
+        this.getColor() === "b" &&
+        board.getEnpassantableSquare().x_pos === x - 1 &&
+        board.getEnpassantableSquare().y_pos === y &&
+        board.getEnpassantColor() === "w"
+      )
+        enpassantMove = true;
+    }
+
+    board.setPieceinBoard(this.x_loc, this.y_loc, null);
+    this.x_loc = x;
+    this.y_loc = y;
+    board.setPieceinBoard(x, y, somePiece);
+    console.log(board.getPieceFromBoard(x, y));
+
+    if (enpassantMove) {
+      enPassantPiece = board.getPieceFromBoard(
+        board.getEnpassantableSquare().x_pos,
+        board.getEnpassantableSquare().y_pos
+      );
+      board.setPieceinBoard(
+        board.getEnpassantableSquare().x_pos,
+        board.getEnpassantableSquare().y_pos,
+        null
+      );
+    }
+
+    let res = king.isKingChecked(board).length > 0;
+    this.x_loc = prev_x;
+    this.y_loc = prev_y;
+    //
+    board.setPieceinBoard(prev_x, prev_y, somePiece);
+    board.setPieceinBoard(x, y, destPiece);
+    if (enpassantMove)
+      board.setPieceinBoard(
+        board.getEnpassantableSquare().x_pos,
+        board.getEnpassantableSquare().y_pos,
+        enPassantPiece
+      );
+    return res;
   }
 }
 

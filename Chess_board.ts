@@ -5,12 +5,17 @@ export class Board {
   squares: PIECE[][] = [];
   blackKing: King;
   whiteKing: King;
+  enPassantableColor: any;
+  enPassantableSquare: { x_pos: number; y_pos: number } = {
+    x_pos: -1,
+    y_pos: -1, //
+  };
   constructor() {
     this.createBoard();
   }
 
   createBoard() {
-    let fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"; //
+    let fen_string = "r3k2r/ppp2ppp/3b1n2/4q3/8/2N2Q2/PPP2PPP/R1B3K1";
     let fen_string_len = fen_string.length;
     let i = 0;
     let j = 0;
@@ -78,5 +83,21 @@ export class Board {
 
   setPieceinBoard(x: number, y: number, piece: PIECE) {
     this.squares[x][y] = piece;
+  }
+  setEnpassantableSquare(x_pos: number, y_pos: number) {
+    this.enPassantableSquare.x_pos = x_pos;
+    this.enPassantableSquare.y_pos = y_pos;
+  }
+  setEnpassantableColor(color: any) {
+    this.enPassantableColor = color;
+  }
+  getEnpassantColor() {
+    return this.enPassantableColor;
+  }
+  getEnpassantableSquare() {
+    return this.enPassantableSquare;
+  }
+  cancelPassant() {
+    this.enPassantableColor = null;
   }
 }
